@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_FUGR" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <AREAT>For Function Modules in BDT Events</AREAT>
+   <INCLUDES>
+    <SOBJ_NAME>LZFG_BDT_EVENTSTOP</SOBJ_NAME>
+    <SOBJ_NAME>SAPLZFG_BDT_EVENTS</SOBJ_NAME>
+   </INCLUDES>
+   <FUNCTIONS>
+    <item>
+     <FUNCNAME>ZBUP_BUPA_EVENT_DLVE2</FUNCNAME>
+     <SHORT_TEXT>DLVE2 event for BP</SHORT_TEXT>
+    </item>
+    <item>
+     <FUNCNAME>ZBUP_BUPA_EVENT_DSAVE</FUNCNAME>
+     <SHORT_TEXT>BDT Events: BP</SHORT_TEXT>
+    </item>
+    <item>
+     <FUNCNAME>ZBUP_BUPA_EVENT_DTAKE</FUNCNAME>
+     <SHORT_TEXT>DTAKE event for BP</SHORT_TEXT>
+    </item>
+   </FUNCTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>
