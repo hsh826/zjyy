@@ -63,6 +63,10 @@ START-OF-SELECTION.
         lt_items        TYPE ztt_pdf_fi_doc_itm,
         ls_header       TYPE zst_pdf_fi_doc_hd.
 
+
+*SQL...
+
+
 * Determine PDF function module for Certificate of guarantee
   CALL FUNCTION 'FP_FUNCTION_MODULE_NAME'
     EXPORTING
