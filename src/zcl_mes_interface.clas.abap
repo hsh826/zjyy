@@ -18,6 +18,7 @@ CLASS zcl_mes_interface DEFINITION
         TransportorName     TYPE char255,
         TransportorPhoneNun TYPE char255,
         TransportCarNumber  TYPE char255,
+        MainWareHouseName   TYPE char512,
         OperateType         TYPE i,
         Recid               TYPE char32,
         Mdfdt               TYPE char23,
@@ -43,14 +44,17 @@ CLASS zcl_mes_interface DEFINITION
         ProductNote        TYPE char32,
         CustomItemCode     TYPE char255,
         PackageType        TYPE char32,
-        Weight             TYPE char64,
-        BigNumber          TYPE char64,
-        SingerNumber       TYPE char64,
-        ProductUnit        TYPE char32,
-        StockUnit          TYPE char32,
+        Weight             TYPE ze_mes_dec31_6,
+        BigNumber          TYPE ze_mes_dec31_6,
+        SingerNumber       TYPE ze_mes_dec31_6,
+        ProductUnit        TYPE ze_mes_dec31_6,
+        StockUnit          TYPE ze_mes_dec31_6,
         Note               TYPE char255,
         SaleOutOrderCode   TYPE char32,
         SaleOutOrderRowNo  TYPE char32,
+        StockQty           TYPE ze_mes_dec31_6,
+        Basic_UnitMainCode TYPE char32,
+        StockScale         TYPE ze_mes_dec31_6,
         OperateType        TYPE i,
         syncflag           TYPE i,
         Mdfdt              TYPE char23,
@@ -136,7 +140,39 @@ CLASS zcl_mes_interface DEFINITION
         Mdfdt                TYPE char23,
         DataBatchNum         TYPE char50,
       END OF ty_OutDeliveryOrderLine,
-      ty_t_OutDeliveryOrderLine TYPE TABLE OF ty_OutDeliveryOrderLine.
+      ty_t_OutDeliveryOrderLine TYPE TABLE OF ty_OutDeliveryOrderLine,
+      BEGIN OF ty_Supplier,
+        Code                 TYPE char32,
+        Name                 TYPE char128,
+        ShortName            TYPE char128,
+        PinYinCode           TYPE char32,
+        OutsourcingAttribute TYPE char32,
+        Address              TYPE char128,
+        Phone                TYPE char128,
+        Contact              TYPE char128,
+        Fax                  TYPE char128,
+        Note                 TYPE char256,
+        OperateType          TYPE i,
+        Recid                TYPE char32,
+        Mdfdt                TYPE char23,
+        syncflag             TYPE i,
+      END OF ty_Supplier,
+      ty_t_Supplier TYPE TABLE OF ty_Supplier,
+      BEGIN OF ty_Customer,
+        Code        TYPE char32,
+        Name        TYPE char128,
+        ShortName   TYPE char128,
+        PinYinCode  TYPE char32,
+        Address     TYPE char128,
+        Phone       TYPE char128,
+        Note        TYPE char256,
+        OperateType TYPE i,
+        Recid       TYPE char32,
+        Mdfdt       TYPE char23,
+        syncflag    TYPE i,
+      END OF ty_Customer,
+      ty_t_Customer TYPE TABLE OF ty_Customer.
+
 
     CLASS-DATA:
       mo_con TYPE REF TO cl_sql_connection.
@@ -166,6 +202,14 @@ CLASS zcl_mes_interface DEFINITION
       Erp_OutDeliveryOrderLine
         IMPORTING
                   it_data TYPE ty_t_OutDeliveryOrderLine
+        RAISING   zcx_mes_interface,
+      Erp_Supplier
+        IMPORTING
+                  it_data TYPE ty_t_Supplier
+        RAISING   zcx_mes_interface,
+      Erp_Customer
+        IMPORTING
+                  it_data TYPE ty_t_Customer
         RAISING   zcx_mes_interface,
       commit
         RAISING zcx_mes_interface,
@@ -207,7 +251,7 @@ CLASS zcl_mes_interface IMPLEMENTATION.
         sql->execute_update( lv_sql ).
 
         lv_sql = |INSERT INTO ZJYYMESDB_Middle.dbo.Erp_DeliveryNotice | &&
-                 |VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)|.
+                 |VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)|.
         sql = NEW cl_sql_statement( con_ref = mo_con ).
         sql->set_param_struct( REF #( it_data[ 1 ] ) ).
         sql->execute_update( lv_sql ).
@@ -239,7 +283,7 @@ CLASS zcl_mes_interface IMPLEMENTATION.
         sql->execute_update( lv_sql ).
 
         lv_sql = |INSERT INTO ZJYYMESDB_Middle.dbo.Erp_DeliveryNoticeLine | &&
-                 |VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)|.
+                 |VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)|.
         sql = NEW cl_sql_statement( con_ref = mo_con ).
         sql->set_param_table( REF #( it_data ) ).
         sql->execute_update( lv_sql ).
@@ -436,6 +480,78 @@ CLASS zcl_mes_interface IMPLEMENTATION.
 
         sql = NEW cl_sql_statement( con_ref = mo_con ).
         sql->set_param( data_ref = REF #( 'Erp_OutDeliveryOrderLine' )
+                        inout    = cl_sql_statement=>c_param_in ).
+        sql->execute_procedure(
+          proc_name = 'ZJYYMESDB_Middle.dbo.proc_Erp_WriteLog' ).
+
+      CATCH cx_sql_exception INTO DATA(lr_exc).
+        RAISE EXCEPTION TYPE zcx_mes_interface
+          EXPORTING
+            previous = lr_exc.
+    ENDTRY.
+
+  ENDMETHOD.
+
+  METHOD erp_customer.
+
+    CHECK mo_con IS BOUND AND it_data IS NOT INITIAL.
+
+    TRY.
+        IF lines( it_data ) = 1.
+          DATA(lv_sql) = |DELETE FROM ZJYYMESDB_Middle.dbo.Erp_Customer | &&
+                         |WHERE Code = ?|.
+          DATA(sql) = NEW cl_sql_statement( con_ref = mo_con ).
+          sql->set_param( REF #( it_data[ 1 ]-code ) ).
+        ELSE.
+          lv_sql = |DELETE FROM ZJYYMESDB_Middle.dbo.Erp_Customer |.
+          sql = NEW cl_sql_statement( con_ref = mo_con ).
+        ENDIF.
+        sql->execute_update( lv_sql ).
+
+        lv_sql = |INSERT INTO ZJYYMESDB_Middle.dbo.Erp_Customer | &&
+                 |VALUES(?,?,?,?,?,?,?,?,?,?,?)|.
+        sql = NEW cl_sql_statement( con_ref = mo_con ).
+        sql->set_param_table( REF #( it_data ) ).
+        sql->execute_update( lv_sql ).
+
+        sql = NEW cl_sql_statement( con_ref = mo_con ).
+        sql->set_param( data_ref = REF #( 'Erp_Customer' )
+                        inout    = cl_sql_statement=>c_param_in ).
+        sql->execute_procedure(
+          proc_name = 'ZJYYMESDB_Middle.dbo.proc_Erp_WriteLog' ).
+
+      CATCH cx_sql_exception INTO DATA(lr_exc).
+        RAISE EXCEPTION TYPE zcx_mes_interface
+          EXPORTING
+            previous = lr_exc.
+    ENDTRY.
+
+  ENDMETHOD.
+
+  METHOD erp_supplier.
+
+    CHECK mo_con IS BOUND AND it_data IS NOT INITIAL.
+
+    TRY.
+        IF lines( it_data ) = 1.
+          DATA(lv_sql) = |DELETE FROM ZJYYMESDB_Middle.dbo.Erp_Supplier | &&
+                         |WHERE Code = ?|.
+          DATA(sql) = NEW cl_sql_statement( con_ref = mo_con ).
+          sql->set_param( REF #( it_data[ 1 ]-code ) ).
+        ELSE.
+          lv_sql = |DELETE FROM ZJYYMESDB_Middle.dbo.Erp_Supplier | .
+          sql = NEW cl_sql_statement( con_ref = mo_con ).
+        ENDIF.
+        sql->execute_update( lv_sql ).
+
+        lv_sql = |INSERT INTO ZJYYMESDB_Middle.dbo.Erp_Supplier | &&
+                 |VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)|.
+        sql = NEW cl_sql_statement( con_ref = mo_con ).
+        sql->set_param_table( REF #( it_data ) ).
+        sql->execute_update( lv_sql ).
+
+        sql = NEW cl_sql_statement( con_ref = mo_con ).
+        sql->set_param( data_ref = REF #( 'Erp_Supplier' )
                         inout    = cl_sql_statement=>c_param_in ).
         sql->execute_procedure(
           proc_name = 'ZJYYMESDB_Middle.dbo.proc_Erp_WriteLog' ).

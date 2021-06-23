@@ -33,6 +33,7 @@ define view ZI_DeliveryNotice
       ZTF_BOLNR_Regex.bolnr_name                                                                     as TransportorName,
       ZTF_BOLNR_Regex.bolnr_phone                                                                    as TransportorPhoneNun,
       MeansOfTransport                                                                               as TransportCarNumber,
+      _ShipToParty._CustomerToBusinessPartner._BusinessPartner.OrganizationBPName2                   as MainWareHouseName,
       0                                                                                              as OperateType,
       DeliveryDocument                                                                               as Recid,
       tstmp_current_utctimestamp()                                                                   as Mdfdt,

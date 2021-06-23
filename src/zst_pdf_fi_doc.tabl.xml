@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>ZST_PDF_FI_DOC</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <TABCLASS>INTTAB</TABCLASS>
+    <DDTEXT>Print FI document - each page</DDTEXT>
+   </DD02V>
+   <DD03P_TABLE>
+    <DD03P>
+     <TABNAME>ZST_PDF_FI_DOC</TABNAME>
+     <FIELDNAME>HEADER</FIELDNAME>
+     <POSITION>0001</POSITION>
+     <ROLLNAME>ZST_PDF_FI_DOC_HD</ROLLNAME>
+     <ADMINFIELD>0</ADMINFIELD>
+     <DATATYPE>STRU</DATATYPE>
+     <MASK>  STRUS</MASK>
+     <COMPTYPE>S</COMPTYPE>
+    </DD03P>
+    <DD03P>
+     <TABNAME>ZST_PDF_FI_DOC</TABNAME>
+     <FIELDNAME>ITEMS</FIELDNAME>
+     <POSITION>0016</POSITION>
+     <ROLLNAME>ZTT_PDF_FI_DOC_ITM</ROLLNAME>
+     <ADMINFIELD>0</ADMINFIELD>
+     <DATATYPE>TTYP</DATATYPE>
+     <MASK>  TTYPL</MASK>
+     <COMPTYPE>L</COMPTYPE>
+    </DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>

@@ -16,7 +16,7 @@ define view ZI_OutDeliveryOrder
                                 when 'ZLR0' then '3'
                                 when 'ZYF'  then '4'
                                 when 'ZLO'  then '5'
-                                when 'LB'   then '2'
+                                when 'LB'   then '1'
                                 else '0'
       end                             as BillType,
       '30'                            as SourceType,

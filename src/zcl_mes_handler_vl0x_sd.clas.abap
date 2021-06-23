@@ -225,10 +225,15 @@ CLASS zcl_mes_handler_vl0x_sd IMPLEMENTATION.
       ls_DeliveryNoticeLine-SaleOutOrderCode = ls_lips-vbeln.
       ls_DeliveryNoticeLine-SaleOutOrderRowNo = ls_lips-posnr.
 
-      ls_DeliveryNoticeLine-BigNumber = |{ ls_item-BigNumber DECIMALS = 3 }|.
-      ls_DeliveryNoticeLine-SingerNumber = |{ ls_item-SingerNumber DECIMALS = 3 }|.
-      ls_DeliveryNoticeLine-ProductUnit = |{ ls_item-ProductUnit DECIMALS = 3 }|.
-      ls_DeliveryNoticeLine-StockUnit = |{ ls_item-StockUnit DECIMALS = 3 }|.
+      ls_DeliveryNoticeLine-Weight = CONV #( ls_item-Weight ).
+      ls_DeliveryNoticeLine-BigNumber = CONV #( ls_item-BigNumber ).
+      ls_DeliveryNoticeLine-SingerNumber = CONV #( ls_item-SingerNumber ).
+      ls_DeliveryNoticeLine-ProductUnit = CONV #( ls_item-ProductUnit ).
+      ls_DeliveryNoticeLine-StockUnit = CONV #( ls_item-StockUnit ).
+
+      ls_DeliveryNoticeLine-stockqty = ls_DeliveryNoticeLine-Qty * 10.
+      ls_DeliveryNoticeLine-basic_unitmaincode = '千个'.
+      ls_DeliveryNoticeLine-stockscale = 10.
 
       lv_name = ls_item-DeliveryNoticeCode && ls_item-SortIndex.
       CALL FUNCTION 'READ_TEXT'
@@ -253,6 +258,14 @@ CLASS zcl_mes_handler_vl0x_sd IMPLEMENTATION.
                                                FOR  i = 1 THEN i + 1 WHILE i <= lines( lt_text )
                                                NEXT o2 = o2 && lt_text[ i ]-tdline ).
 
+      ENDIF.
+
+      IF ls_DeliveryNoticeLine-Note IS NOT INITIAL.
+        ls_DeliveryNoticeLine-productnote = ls_DeliveryNoticeLine-Note.
+      ELSEIF ls_item-ProductNote IS NOT INITIAL.
+        ls_DeliveryNoticeLine-productnote = |{ ls_item-ProductNote DATE = ISO }|.
+      ELSE.
+        ls_DeliveryNoticeLine-productnote = ''.
       ENDIF.
 
       CASE mv_updkz.

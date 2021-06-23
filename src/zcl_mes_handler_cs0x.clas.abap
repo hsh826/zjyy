@@ -48,7 +48,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_mes_handler_cs0x IMPLEMENTATION.
+CLASS ZCL_MES_HANDLER_CS0X IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -142,10 +142,10 @@ CLASS zcl_mes_handler_cs0x IMPLEMENTATION.
 
 
   METHOD zif_mes_handler~replicate.
-    DATA: ls_BomLine           TYPE zcl_mes_interface=>ty_bomline,
-          lt_BomLine           TYPE zcl_mes_interface=>ty_t_bomline,
-          ls_ProductBomReplace TYPE zcl_mes_interface=>ty_productbomreplace,
-          lt_ProductBomReplace TYPE zcl_mes_interface=>ty_t_productbomreplace.
+    DATA: ls_bomline           TYPE zcl_mes_interface=>ty_bomline,
+          lt_bomline           TYPE zcl_mes_interface=>ty_t_bomline,
+          ls_productbomreplace TYPE zcl_mes_interface=>ty_productbomreplace,
+          lt_productbomreplace TYPE zcl_mes_interface=>ty_t_productbomreplace.
 
 
     CHECK is_triggered( ) = abap_true.
@@ -158,40 +158,40 @@ CLASS zcl_mes_handler_cs0x IMPLEMENTATION.
 *   SQL
     query_sap( EXPORTING iv_stlnr = mv_stlnr
                          iv_stlal = mv_stlal
-               IMPORTING et_bomline = lt_BomLine
-                         et_productbomreplace = lt_ProductBomReplace ).
+               IMPORTING et_bomline = lt_bomline
+                         et_productbomreplace = lt_productbomreplace ).
 
 *   Compare
     LOOP AT mt_oldbomline_key INTO DATA(ls_oldbomline_key).
-      IF NOT line_exists( lt_BomLine[ bomcode = ls_oldbomline_key-bomcode
+      IF NOT line_exists( lt_bomline[ bomcode = ls_oldbomline_key-bomcode
                                       productcode = ls_oldbomline_key-productcode
                                       routingcode = ls_oldbomline_key-routingcode ] ).
-        CLEAR ls_BomLine.
-        MOVE-CORRESPONDING ls_oldbomline_key TO ls_BomLine.
-        ls_BomLine-operatetype = 4.
-        ls_BomLine-mdfdt = lv_datetime.
-        APPEND ls_BomLine TO lt_BomLine.
+        CLEAR ls_bomline.
+        MOVE-CORRESPONDING ls_oldbomline_key TO ls_bomline.
+        ls_bomline-operatetype = 4.
+        ls_bomline-mdfdt = lv_datetime.
+        APPEND ls_bomline TO lt_bomline.
       ENDIF.
     ENDLOOP.
-    LOOP AT lt_BomLine ASSIGNING FIELD-SYMBOL(<fs_BomLine>) WHERE operatetype = 0.
-      <fs_BomLine>-operatetype = 1.
-      <fs_BomLine>-mdfdt = lv_datetime.
+    LOOP AT lt_bomline ASSIGNING FIELD-SYMBOL(<fs_bomline>) WHERE operatetype = 0.
+      <fs_bomline>-operatetype = 1.
+      <fs_bomline>-mdfdt = lv_datetime.
     ENDLOOP.
 
     LOOP AT mt_oldproductbomreplace_key INTO DATA(ls_oldproductbomreplace_key).
-      IF NOT line_exists( lt_ProductBomReplace[ productcode = ls_oldproductbomreplace_key-productcode
+      IF NOT line_exists( lt_productbomreplace[ productcode = ls_oldproductbomreplace_key-productcode
                                                 routingcode = ls_oldproductbomreplace_key-routingcode
                                                 bomcode = ls_oldproductbomreplace_key-bomcode ] ).
-        CLEAR ls_ProductBomReplace.
-        MOVE-CORRESPONDING ls_oldproductbomreplace_key TO ls_ProductBomReplace.
-        ls_ProductBomReplace-operatetype = 4.
-        ls_ProductBomReplace-mdfdt = lv_datetime.
-        APPEND ls_ProductBomReplace TO lt_ProductBomReplace.
+        CLEAR ls_productbomreplace.
+        MOVE-CORRESPONDING ls_oldproductbomreplace_key TO ls_productbomreplace.
+        ls_productbomreplace-operatetype = 4.
+        ls_productbomreplace-mdfdt = lv_datetime.
+        APPEND ls_productbomreplace TO lt_productbomreplace.
       ENDIF.
     ENDLOOP.
-    LOOP AT lt_ProductBomReplace ASSIGNING FIELD-SYMBOL(<fs_ProductBomReplace>) WHERE operatetype = 0.
-      <fs_ProductBomReplace>-operatetype = 1.
-      <fs_ProductBomReplace>-mdfdt = lv_datetime.
+    LOOP AT lt_productbomreplace ASSIGNING FIELD-SYMBOL(<fs_productbomreplace>) WHERE operatetype = 0.
+      <fs_productbomreplace>-operatetype = 1.
+      <fs_productbomreplace>-mdfdt = lv_datetime.
     ENDLOOP.
 
 *    IF lt_BomLine IS INITIAL.
@@ -240,13 +240,28 @@ CLASS zcl_mes_handler_cs0x IMPLEMENTATION.
 
 
 *   Update MES DB
+    "CR start
+*delete matnr leading Zero
+    LOOP AT lt_bomline INTO DATA(wa1).
+      SHIFT wa1-productcode LEFT DELETING LEADING '0'.
+      SHIFT wa1-itemcode    LEFT DELETING LEADING '0'.
+      MODIFY lt_bomline FROM wa1.
+    ENDLOOP.
+    LOOP AT lt_productbomreplace INTO DATA(wa2).
+      SHIFT wa2-productcode         LEFT DELETING LEADING '0'.
+      SHIFT wa2-itemoriginalcode    LEFT DELETING LEADING '0'.
+      SHIFT wa2-itemreplacecode     LEFT DELETING LEADING '0'.
+      MODIFY lt_productbomreplace FROM wa2.
+    ENDLOOP.
+    "CR end
+
     TRY.
-        IF lt_BomLine IS NOT INITIAL.
-          zcl_mes_interface=>Erp_BomLine( it_data = lt_BomLine ).
+        IF lt_bomline IS NOT INITIAL.
+          zcl_mes_interface=>erp_bomline( it_data = lt_bomline ).
         ENDIF.
 
-        IF lt_ProductBomReplace IS NOT INITIAL.
-          zcl_mes_interface=>Erp_ProductBomReplace( it_data = lt_ProductBomReplace ).
+        IF lt_productbomreplace IS NOT INITIAL.
+          zcl_mes_interface=>erp_productbomreplace( it_data = lt_productbomreplace ).
         ENDIF.
 
       CATCH zcx_mes_interface INTO DATA(lr_exc).

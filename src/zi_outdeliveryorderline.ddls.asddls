@@ -13,13 +13,13 @@ define view ZI_OutDeliveryOrderLine
   key DeliveryDocument                                                                        as OutDeliveryOrderCode,
   key DeliveryDocumentItem                                                                    as SortIndex,
       DeliveryDocumentItem                                                                    as RowNo,
-      Material                                                                                as ItemCode,
+      ltrim(Material,'0')                                                                     as ItemCode,
       _DeliveryQuantityUnit._Text[ 1: Language = $session.system_language ].UnitOfMeasureName as UnitSaleMainCode,
-      ''                                                                                      as UnitSaleAuxCode, //null
-      0                                                                                       as RateFra, //null
-      0                                                                                       as RateNum, //null
+      _DeliveryQuantityUnit._Text[ 1: Language = $session.system_language ].UnitOfMeasureName as UnitSaleAuxCode,
+      1                                                                                       as RateFra,
+      1                                                                                       as RateNum,
       ActualDeliveryQuantity                                                                  as Qty,
-      0                                                                                       as AuxQty,  //null
+      ActualDeliveryQuantity                                                                  as AuxQty,
       dats_tims_to_tstmp( _DeliveryDocument.PlannedGoodsIssueDate,
                           '000000',
                           '',

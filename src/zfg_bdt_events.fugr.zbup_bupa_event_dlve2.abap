@@ -112,6 +112,8 @@ FUNCTION zbup_bupa_event_dlve2.
 
 
 * Vendor
+  DATA: lv_space TYPE text1_042z.
+
   SELECT COUNT(*) FROM but100 WHERE partner = ls_partner-partner
                                 AND rltyp = 'FLVN01'
                                 AND dfval = ''
@@ -121,6 +123,11 @@ FUNCTION zbup_bupa_event_dlve2.
       INNER JOIN adrc ON adrc~addrnumber = I_Supplier~AddressID
 *                     AND adrc~date_from = '00010101'
                      AND adrc~nation    = ' '
+      INNER JOIN lfa1 ON lfa1~lifnr = I_Supplier~Supplier
+      LEFT OUTER JOIN tsfgt ON tsfgt~sfrgr = lfa1~sfrgr
+                           AND tsfgt~spras = @sy-langu
+      LEFT OUTER JOIN j_1atodct ON j_1atodct~j_1atodc = I_Supplier~TaxNumberType
+                               AND j_1atodct~spras = @sy-langu
       FIELDS \_SupplierToBusinessPartner\_BusinessPartner[ (1) INNER WHERE BusinessPartner = @ls_partner-partner ]-BusinessPartner AS Code,
              \_SupplierToBusinessPartner\_BusinessPartner-BusinessPartnerName AS Name,
              \_SupplierToBusinessPartner\_BusinessPartner-SearchTerm1 AS ShortName,
@@ -130,7 +137,13 @@ FUNCTION zbup_bupa_event_dlve2.
              SupplierCorporateGroup AS OutsourcingAttribute,
              adrc~street AS Address,
              adrc~tel_number AS Phone,
+             \_SupplierPurchasingOrg-SupplierRespSalesPersonName AS Contact,
+             adrc~fax_number AS Fax,
              ' ' AS Note,
+             tsfgt~bezei AS DeliveryMethod,
+             \_SupplierCompany\_PaymentTermsText[ Language = @sy-langu ]-PaymentTermsName AS RequestMethod,
+             j_1atodct~text30 AS InvoiceType,
+             @lv_space AS PaymentMethod,
              CASE " WHEN PurchasingIsBlocked = 'X' THEN 3
                   WHEN \_SupplierToBusinessPartner\_BusinessPartner[ BusinessPartner = @ls_partner-partner ]-IsMarkedForArchiving = 'X' THEN 3
                   WHEN \_SupplierToBusinessPartner\_BusinessPartner[ BusinessPartner = @ls_partner-partner ]-BusinessPartnerIsBlocked = 'X' THEN 3
@@ -140,6 +153,16 @@ FUNCTION zbup_bupa_event_dlve2.
              @lv_datetime AS Mdfdt,
              0 AS syncflag
       INTO TABLE @DATA(lt_data2).
+
+    LOOP AT lt_data2 REFERENCE INTO DATA(lr_data2).
+      SELECT SINGLE zwels FROM lfb1 WHERE lifnr = @lr_data2->Code INTO @lv_space.
+      IF sy-subrc = 0.
+        CONDENSE lv_space NO-GAPS.
+        SELECT SINGLE text1 FROM t042z WHERE land1 = 'CN'
+                                         AND zlsch = @lv_space(1)
+                                        INTO @lr_data2->paymentmethod.
+      ENDIF.
+    ENDLOOP.
 
     TRY.
         con = cl_sql_connection=>get_abap_connection( 'MESMIDDB' ).
@@ -151,7 +174,7 @@ FUNCTION zbup_bupa_event_dlve2.
         sql->execute_update( lv_sql ).
 
         lv_sql = |INSERT INTO ZJYYMESDB_Middle.dbo.Erp_Supplier | &&
-                 |VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)|.
+                 |VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?)|.
         sql = NEW cl_sql_prepared_statement( con_ref = con statement = lv_sql ).
         sql->set_param_struct( REF #( lt_data2[ 1 ] ) ).
         sql->execute_update( lv_sql ).
@@ -185,7 +208,7 @@ FUNCTION zbup_bupa_event_dlve2.
           sql->execute_update( lv_sql ).
 
           lv_sql = |INSERT INTO ZJYYMESDB_Middle.dbo.Erp_Supplier | &&
-                   |VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)|.
+                   |VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?)|.
           sql = NEW cl_sql_prepared_statement( con_ref = con statement = lv_sql ).
           sql->set_param_struct( REF #( lt_data2[ 1 ] ) ).
           sql->execute_update( lv_sql ).

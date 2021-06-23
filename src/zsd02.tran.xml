@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TRAN" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <TSTC>
+    <TCODE>ZSD02</TCODE>
+    <PGMNA>ZR_SD_SALESORDER_LIST</PGMNA>
+    <DYPNO>1000</DYPNO>
+    <CINFO>kA==</CINFO>
+   </TSTC>
+   <TSTCC>
+    <TCODE>ZSD02</TCODE>
+    <S_WEBGUI>1</S_WEBGUI>
+    <S_WIN32>X</S_WIN32>
+    <S_PLATIN>X</S_PLATIN>
+   </TSTCC>
+   <TSTCT>
+    <SPRSL>E</SPRSL>
+    <TCODE>ZSD02</TCODE>
+    <TTEXT>销售订单明细表</TTEXT>
+   </TSTCT>
+   <TSTCP>
+    <TCODE>ZSD02</TCODE>
+    <PARAM>/DFT</PARAM>
+   </TSTCP>
+   <I18N_TPOOL>
+    <TSTCT>
+     <SPRSL>1</SPRSL>
+     <TTEXT>销售订单明细表</TTEXT>
+    </TSTCT>
+   </I18N_TPOOL>
+  </asx:values>
+ </asx:abap>
+</abapGit>
